@@ -5,7 +5,7 @@ if __name__ == "__main__":
 
     # Estado inicial com o tema do artigo
     initial_state = {
-        "topic": "Primeiros passos na utilização do CrewAI para criação de agentes de IA"
+        "topic": "Uso da inteligência artificial na área da saúde."
     }
 
     # Executa o fluxo completo
