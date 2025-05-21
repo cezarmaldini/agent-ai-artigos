@@ -2,28 +2,35 @@
 import streamlit as st
 from graph import build_graph
 
-st.set_page_config(page_title="Gerador de Artigos com IA", layout="wide")
+st.set_page_config(page_title="Chatbot com IA", layout="wide")
+st.title("🤖 Chatbot de Geração de Artigos com IA")
+st.markdown("Converse com o agente para criar um artigo com base no tema que você for discutindo.")
 
-st.title("📝 Gerador de Artigos com IA")
-st.markdown("Insira um tema e deixe que nossos agentes façam a pesquisa, escrita e revisão para você.")
+# Inicializa o histórico do chat
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-# Campo para entrada do tema
-topic = st.text_input("Tema do artigo", placeholder="Ex: Uso da inteligência artificial na área da saúde.")
+# Exibe as mensagens anteriores
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# Botão para iniciar o processo
-if st.button("Gerar Artigo"):
-    if topic:
-        with st.spinner("Pesquisando, escrevendo e revisando..."):
+# Entrada de mensagem do usuário
+prompt = st.chat_input("Digite sua mensagem aqui...")
+
+if prompt:
+    # Adiciona a mensagem do usuário ao histórico
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Processa a resposta com seu agente IA
+    with st.chat_message("assistant"):
+        with st.spinner("Aguarde, processando..."):
             flow = build_graph()
-            result = flow.invoke({"topic": topic})
-            final_article = result["final_article"]
+            response = flow.invoke({"topic": prompt})
+            final_article = response.get("final_article", "Desculpe, não consegui gerar uma resposta.")
+            st.markdown(final_article)
 
-        st.success("✅ Artigo gerado com sucesso!")
-        st.subheader("📄 Artigo Final:")
-        st.write(final_article)
-
-        # Expansível com as opções de cópia ou download
-        st.download_button("📥 Baixar artigo como TXT", data=final_article, file_name="artigo.txt")
-
-    else:
-        st.warning("Por favor, insira um tema para gerar o artigo.")
+    # Adiciona a resposta do agente ao histórico
+    st.session_state.messages.append({"role": "assistant", "content": final_article})
